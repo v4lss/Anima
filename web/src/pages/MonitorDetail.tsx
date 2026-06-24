@@ -1,31 +1,37 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Monitor, Check } from "../types/monitor";
+import { AlertConfig, AlertType } from "../types/alert";
 import { api } from "../services/api";
 import StatusBadge from "../components/StatusBadge";
 import Button from "../components/Button";
+import Input from "../components/Input";
 
 export default function MonitorDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [monitor, setMonitor] = useState<Monitor | null>(null);
   const [checks, setChecks]   = useState<Check[]>([]);
+  const [alerts, setAlerts]   = useState<AlertConfig[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAlertForm, setShowAlertForm] = useState(false);
 
   useEffect(() => {
     async function load() {
       try {
-        const [mRes, cRes] = await Promise.all([
+        const [mRes, cRes, aRes] = await Promise.all([
           api.get<{ data: Monitor }>(`/api/monitors/${id}`),
           api.get<{ data: Check[] }>(`/api/monitors/${id}/history`),
+          api.get<{ data: AlertConfig[] }>(`/api/monitors/${id}/alerts`),
         ]);
         setMonitor(mRes.data);
         setChecks(cRes.data ?? []);
+        setAlerts(aRes.data ?? []);
       } finally {
         setLoading(false);
       }
     }
-    load();
+    load().catch(console.error);
   }, [id]);
 
   if (loading) return <p style={{ color: "var(--subtle)" }}>Loading…</p>;
@@ -124,6 +130,132 @@ export default function MonitorDetail() {
           ))}
         </div>
       )}
+
+      {/* Alerts */}
+      <div style={{ marginTop: "32px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+          <p style={{ fontWeight: 500, fontSize: "13px" }}>Alerts</p>
+          <Button onClick={() => setShowAlertForm(!showAlertForm)} variant="ghost">
+            {showAlertForm ? "Cancel" : "+ Add alert"}
+          </Button>
+        </div>
+
+        {showAlertForm && <AlertForm monitorId={id!} onCreated={async () => { setShowAlertForm(false); await loadAlerts(); }} />}
+
+        {alerts.length === 0 && !showAlertForm ? (
+          <p style={{ color: "var(--subtle)", fontSize: "13px" }}>No alerts configured.</p>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {alerts.map(a => (
+              <div key={a.id} style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "12px 16px",
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--radius)",
+              }}>
+                <div>
+                  <p style={{ fontWeight: 500, fontSize: "13px" }}>{a.type}</p>
+                  <p style={{ color: "var(--subtle)", fontSize: "12px", fontFamily: "var(--mono)" }}>
+                    {a.webhook}
+                  </p>
+                </div>
+                <button
+                  onClick={() => deleteAlert(a.id)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "var(--subtle)",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    fontSize: "16px",
+                    lineHeight: 1,
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--down)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "var(--subtle)")}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  async function loadAlerts() {
+    try {
+      const res = await api.get<{ data: AlertConfig[] }>(`/api/monitors/${id}/alerts`);
+      setAlerts(res.data ?? []);
+    } catch (e: any) {
+      console.error(e);
+    }
+  }
+
+  async function deleteAlert(alertId: string) {
+    await api.delete(`/api/monitors/${id}/alerts/${alertId}`);
+    setAlerts(prev => prev.filter(a => a.id !== alertId));
+  }
+}
+
+function AlertForm({ monitorId, onCreated }: { monitorId: string; onCreated: () => void }) {
+  const [type, setType] = useState<AlertType>("DISCORD");
+  const [webhook, setWebhook] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function submit() {
+    try {
+      setLoading(true);
+      await api.post(`/api/monitors/${monitorId}/alerts`, { type, webhook });
+      onCreated();
+    } catch (e: any) {
+      alert(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div style={{
+      background: "var(--surface)",
+      border: "1px solid var(--accent-dim)",
+      borderRadius: "var(--radius)",
+      padding: "20px",
+      marginBottom: "16px",
+      display: "flex",
+      flexDirection: "column",
+      gap: "14px",
+    }}>
+      <p style={{ fontWeight: 500, fontSize: "13px" }}>New alert</p>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          <label style={{ fontSize: "12px", color: "var(--subtle)", fontWeight: 500, letterSpacing: "0.04em" }}>TYPE</label>
+          <select
+            value={type}
+            onChange={e => setType(e.target.value as AlertType)}
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius)",
+              color: "var(--text)",
+              padding: "9px 12px",
+            }}
+          >
+            <option>DISCORD</option>
+            <option>EMAIL</option>
+          </select>
+        </div>
+        <Input label="Webhook URL" value={webhook} onChange={e => setWebhook(e.target.value)} placeholder="https://discord.com/api/webhooks/..." />
+      </div>
+
+      <div style={{ display: "flex", gap: "8px" }}>
+        <Button onClick={submit} loading={loading}>Create</Button>
+      </div>
     </div>
   );
 }
