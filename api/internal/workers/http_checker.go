@@ -10,7 +10,6 @@ import (
 
 	"github.com/v4lss/animas/internal/domain/alert"
 	"github.com/v4lss/animas/internal/domain/monitor"
-	"github.com/v4lss/animas/internal/infrastructure/mongodb"
 	redisinfra "github.com/v4lss/animas/internal/infrastructure/redis"
 	"github.com/v4lss/animas/pkg/notifier"
 )
