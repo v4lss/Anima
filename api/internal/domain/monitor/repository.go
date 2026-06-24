@@ -10,6 +10,7 @@ type Repository interface {
 	Create(ctx context.Context, m *Monitor) error
 	FindByID(ctx context.Context, id string) (*Monitor, error)
 	FindByUserID(ctx context.Context, userID string) ([]*Monitor, error)
+	FindAllEnabled(ctx context.Context) ([]*Monitor, error)
 	Update(ctx context.Context, m *Monitor) error
 	Delete(ctx context.Context, id string) error
 }

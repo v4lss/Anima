@@ -1,9 +1,9 @@
 # Roadmap
 
-## v1 - Core
+## v1 — Core
 - [x] Project setup
-- [x] User registration & login
 - [x] JWT authentication
+- [x] User registration & login
 - [x] HTTP/HTTPS monitors
 - [x] TCP monitors
 - [x] Check history & metrics

@@ -41,6 +41,15 @@ func (r *MonitorRepository) FindByUserID(ctx context.Context, userID string) ([]
 	return monitors, cursor.All(ctx, &monitors)
 }
 
+func (r *MonitorRepository) FindAllEnabled(ctx context.Context) ([]*monitor.Monitor, error) {
+	cursor, err := r.col.Find(ctx, bson.M{"enabled": true})
+	if err != nil {
+		return nil, err
+	}
+	var monitors []*monitor.Monitor
+	return monitors, cursor.All(ctx, &monitors)
+}
+
 func (r *MonitorRepository) Update(ctx context.Context, m *monitor.Monitor) error {
 	_, err := r.col.ReplaceOne(ctx, bson.M{"_id": m.ID}, m)
 	return err
