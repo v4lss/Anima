@@ -45,6 +45,11 @@ func main() {
 
 	db := mongoClient.Database(cfg.Mongo.DB)
 
+	// Indexes
+	if err := mongodb.EnsureIndexes(ctx, db); err != nil {
+		logger.Fatal("failed to create indexes: %v", err)
+	}
+
 	// Repositories
 	userRepo    := mongodb.NewUserRepository(db)
 	monitorRepo := mongodb.NewMonitorRepository(db)
@@ -59,7 +64,7 @@ func main() {
 	jwtSvc := jwt.New(cfg.JWT.Secret, expiry)
 
 	// HTTP
-	router := apphttp.NewRouter(jwtSvc, userRepo, monitorRepo, checkRepo)
+	router := apphttp.NewRouter(jwtSvc, userRepo, monitorRepo, checkRepo, queue.Client())
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%s", cfg.App.Port),

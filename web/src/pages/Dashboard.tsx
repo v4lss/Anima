@@ -58,7 +58,7 @@ export default function Dashboard() {
               onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--muted)")}
               onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--border)")}
             >
-              <StatusBadge status={m.enabled ? "UP" : "DOWN"} />
+              <StatusBadge status={m.lastStatus || (m.enabled ? "UP" : "DOWN")} />
 
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ fontWeight: 500, fontSize: "14px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>

@@ -63,7 +63,23 @@ func (h *MonitorHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.Success(w, http.StatusOK, monitors)
+	// Attach last check status to each monitor
+	type monitorWithStatus struct {
+		*monitor.Monitor
+		LastStatus monitor.CheckStatus `json:"lastStatus"`
+	}
+
+	result := make([]monitorWithStatus, len(monitors))
+	for i, m := range monitors {
+		checks, err := h.checkRepo.FindByMonitorID(r.Context(), m.ID, 1)
+		lastStatus := monitor.StatusDown
+		if err == nil && len(checks) > 0 {
+			lastStatus = checks[0].Status
+		}
+		result[i] = monitorWithStatus{Monitor: m, LastStatus: lastStatus}
+	}
+
+	response.Success(w, http.StatusOK, result)
 }
 
 // Get handles GET /api/monitors/:id

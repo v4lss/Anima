@@ -21,6 +21,11 @@ func NewQueue(addr, password string) *Queue {
 	return &Queue{client: rdb}
 }
 
+// Client returns the underlying Redis client.
+func (q *Queue) Client() *redis.Client {
+	return q.client
+}
+
 // Push adds a monitorID to the given queue name (e.g. "jobs:http").
 func (q *Queue) Push(ctx context.Context, queue, monitorID string) error {
 	return q.client.RPush(ctx, queue, monitorID).Err()

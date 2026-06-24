@@ -13,6 +13,7 @@ export interface Monitor {
   enabled: boolean;
   createdat: string;
   updatedat: string;
+  lastStatus?: CheckStatus; // last check status from API
 }
 
 export interface Check {

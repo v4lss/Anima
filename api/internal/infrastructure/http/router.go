@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/v4lss/animas/internal/domain/monitor"
 	"github.com/v4lss/animas/internal/domain/user"
@@ -20,6 +21,7 @@ func NewRouter(
 	userRepo   user.Repository,
 	monitorRepo monitor.Repository,
 	checkRepo  monitor.CheckRepository,
+	redisClient *redis.Client,
 ) http.Handler {
 	r := chi.NewRouter()
 
@@ -27,6 +29,7 @@ func NewRouter(
 	r.Use(chimiddleware.Logger)
 	r.Use(chimiddleware.Recoverer)
 	r.Use(chimiddleware.RequestID)
+	r.Use(middleware.RateLimit(redisClient, 60)) // 60 requests per minute
 
 	// Health check
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
