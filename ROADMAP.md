@@ -1,6 +1,6 @@
 # Roadmap
 
-## v1 — Core
+## v1 - Core
 - [x] Project setup
 - [x] JWT authentication
 - [x] User registration & login
@@ -18,3 +18,9 @@
 - [ ] Public dashboards
 - [ ] Webhooks
 - [ ] Multi-region checks
+
+## Technical Improvements
+- [x] MongoDB indexes for performance
+- [x] Rate limiting middleware (Redis)
+- [x] Actual last check status in UI
+- [x] Basic unit tests
