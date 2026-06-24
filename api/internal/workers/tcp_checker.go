@@ -26,16 +26,11 @@ func NewTCPChecker(mr monitor.Repository, cr monitor.CheckRepository, q *redisin
 // Run blocks and processes jobs from the TCP queue.
 func (c *TCPChecker) Run(ctx context.Context) {
 	for {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			monitorID, err := c.queue.Pop(ctx, "jobs:tcp")
-			if err != nil {
-				continue
-			}
-			c.check(ctx, monitorID)
+		monitorID, err := c.queue.Pop(ctx, "jobs:tcp")
+		if err != nil {
+			continue
 		}
+		c.check(ctx, monitorID)
 	}
 }
 

@@ -32,16 +32,11 @@ func NewHTTPChecker(mr monitor.Repository, cr monitor.CheckRepository, q *redisi
 // Run blocks and processes jobs from the HTTP queue.
 func (c *HTTPChecker) Run(ctx context.Context) {
 	for {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			monitorID, err := c.queue.Pop(ctx, "jobs:http")
-			if err != nil {
-				continue
-			}
-			c.check(ctx, monitorID)
+		monitorID, err := c.queue.Pop(ctx, "jobs:http")
+		if err != nil {
+			continue
 		}
+		c.check(ctx, monitorID)
 	}
 }
 
