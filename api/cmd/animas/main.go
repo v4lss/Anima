@@ -1,5 +1,5 @@
 // main is the entry point for the Animas API server.
-// It wires together config, infrastructure, application services, and HTTP.
+// Wires config, MongoDB, Redis, repositories, router, workers and HTTP.
 package main
 
 import (
@@ -11,25 +11,55 @@ import (
 	"syscall"
 	"time"
 
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+
 	"github.com/v4lss/animas/internal/infrastructure/config"
 	apphttp "github.com/v4lss/animas/internal/infrastructure/http"
+	"github.com/v4lss/animas/internal/infrastructure/mongodb"
+	redisinfra "github.com/v4lss/animas/internal/infrastructure/redis"
+	"github.com/v4lss/animas/internal/workers"
 	"github.com/v4lss/animas/pkg/jwt"
 	"github.com/v4lss/animas/pkg/logger"
 )
 
 func main() {
-	// ── Config ──────────────────────────────────────────────────────────────
+	// Config
 	cfg, err := config.Load("configs/config.yaml")
 	if err != nil {
 		logger.Fatal("failed to load config: %v", err)
 	}
 
-	// ── JWT ─────────────────────────────────────────────────────────────────
+	// MongoDB
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.Mongo.URI))
+	if err != nil {
+		logger.Fatal("failed to connect to MongoDB: %v", err)
+	}
+	if err := mongoClient.Ping(ctx, nil); err != nil {
+		logger.Fatal("MongoDB ping failed: %v", err)
+	}
+	logger.Info("MongoDB connected\n")
+
+	db := mongoClient.Database(cfg.Mongo.DB)
+
+	// Repositories
+	userRepo    := mongodb.NewUserRepository(db)
+	monitorRepo := mongodb.NewMonitorRepository(db)
+	checkRepo   := mongodb.NewCheckRepository(db)
+
+	// Redis
+	queue := redisinfra.NewQueue(cfg.Redis.Addr, cfg.Redis.Password)
+	logger.Info("Redis queue ready\n")
+
+	// JWT
 	expiry, _ := time.ParseDuration(cfg.JWT.Expiry)
 	jwtSvc := jwt.New(cfg.JWT.Secret, expiry)
 
-	// ── HTTP ─────────────────────────────────────────────────────────────────
-	router := apphttp.NewRouter(jwtSvc)
+	// HTTP
+	router := apphttp.NewRouter(jwtSvc, userRepo, monitorRepo, checkRepo)
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%s", cfg.App.Port),
@@ -38,7 +68,18 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	// ── Graceful shutdown ────────────────────────────────────────────────────
+	// Workers
+	workerCtx, workerCancel := context.WithCancel(context.Background())
+
+	scheduler   := workers.NewScheduler(monitorRepo, queue)
+	httpChecker := workers.NewHTTPChecker(monitorRepo, checkRepo, queue)
+	tcpChecker  := workers.NewTCPChecker(monitorRepo, checkRepo, queue)
+
+	go scheduler.Run(workerCtx)
+	go httpChecker.Run(workerCtx)
+	go tcpChecker.Run(workerCtx)
+
+	// Graceful shutdown
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGTERM)
 
@@ -52,7 +93,10 @@ func main() {
 	<-done
 	logger.Info("shutting down...\n")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	srv.Shutdown(ctx)
+	workerCancel()
+
+	shutCtx, shutCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutCancel()
+	srv.Shutdown(shutCtx)
+	mongoClient.Disconnect(shutCtx)
 }

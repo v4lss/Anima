@@ -109,7 +109,7 @@ export default function Dashboard() {
   );
 }
 
-// ── CreateMonitorForm ────────────────────────────────────────────────────────
+// CreateMonitorForm
 
 function CreateMonitorForm({ onCreated, onCancel }: { onCreated: () => void; onCancel: () => void }) {
   const [name, setName]         = useState("");
@@ -182,7 +182,7 @@ function CreateMonitorForm({ onCreated, onCancel }: { onCreated: () => void; onC
   );
 }
 
-// ── EmptyState ────────────────────────────────────────────────────────────────
+// EmptyState
 
 function EmptyState({ onAdd }: { onAdd: () => void }) {
   return (

@@ -4,9 +4,9 @@
 - [x] Project setup
 - [x] User registration & login
 - [x] JWT authentication
-- [ ] HTTP/HTTPS monitors
-- [ ] TCP monitors
-- [ ] Check history & metrics
+- [x] HTTP/HTTPS monitors
+- [x] TCP monitors
+- [x] Check history & metrics
 
 ## v2 - Alerts & Pages
 - [ ] Discord alerts
