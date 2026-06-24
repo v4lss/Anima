@@ -5,21 +5,21 @@ export type CheckStatus = "UP" | "DOWN";
 
 export interface Monitor {
   id: string;
-  userId: string;
+  userid: string;
   name: string;
   target: string;
   type: MonitorType;
   interval: number; // seconds
   enabled: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdat: string;
+  updatedat: string;
 }
 
 export interface Check {
   id: string;
-  monitorId: string;
+  monitorid: string;
   status: CheckStatus;
-  responseTime: number; // ms
+  responsetime: number; // ms
   error?: string;
-  checkedAt: string;
+  checkedat: string;
 }

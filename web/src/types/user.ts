@@ -3,12 +3,10 @@
 export interface User {
   id: string;
   email: string;
-  createdAt: string;
+  createdat: string;
 }
 
 export interface AuthResponse {
-  data: {
-    token: string;
-    user: User;
-  };
+  token: string;
+  user: User;
 }

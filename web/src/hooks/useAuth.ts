@@ -11,7 +11,7 @@ export function useAuth() {
       setLoading(true);
       setError(null);
       const res = await api.post<AuthResponse>("/api/auth/login", { email, password });
-      localStorage.setItem("animas_token", res.data.token);
+      localStorage.setItem("animas_token", res.token);
       return true;
     } catch (e: any) {
       setError(e.message);
