@@ -9,7 +9,7 @@
 - [x] Check history & metrics
 
 ## v2 - Alerts & Pages
-- [ ] Discord alerts
+- [x] Discord alerts
 - [ ] Email alerts
 - [ ] Public status pages
 
