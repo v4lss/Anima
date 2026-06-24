@@ -14,10 +14,10 @@ const (
 
 // Alert records a single notification that was sent.
 type Alert struct {
-	ID        string
-	MonitorID string
-	UserID    string
-	Type      AlertType
-	Message   string
-	SentAt    time.Time
+	ID        string     `bson:"id"`
+	MonitorID string     `bson:"monitorid"`
+	UserID    string     `bson:"userid"`
+	Type      AlertType  `bson:"type"`
+	Message   string     `bson:"message"`
+	SentAt    time.Time  `bson:"sentat"`
 }

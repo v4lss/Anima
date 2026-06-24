@@ -46,6 +46,26 @@ func EnsureIndexes(ctx context.Context, db *mongo.Database) error {
 		return err
 	}
 
+	// Alert configs collection
+	alertConfigIndexes := []mongo.IndexModel{
+		{
+			Keys: bson.D{{Key: "monitorid", Value: 1}},
+		},
+	}
+	if _, err := db.Collection("alert_configs").Indexes().CreateMany(ctx, alertConfigIndexes); err != nil {
+		return err
+	}
+
+	// Alerts collection
+	alertIndexes := []mongo.IndexModel{
+		{
+			Keys: bson.D{{Key: "monitorid", Value: 1}, {Key: "sentat", Value: -1}},
+		},
+	}
+	if _, err := db.Collection("alerts").Indexes().CreateMany(ctx, alertIndexes); err != nil {
+		return err
+	}
+
 	log.Println("MongoDB indexes created successfully")
 	return nil
 }

@@ -8,6 +8,7 @@ import (
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/redis/go-redis/v9"
 
+	"github.com/v4lss/animas/internal/domain/alert"
 	"github.com/v4lss/animas/internal/domain/monitor"
 	"github.com/v4lss/animas/internal/domain/user"
 	"github.com/v4lss/animas/internal/infrastructure/http/handler"
@@ -17,11 +18,12 @@ import (
 
 // NewRouter creates and returns the configured chi router with all real handlers.
 func NewRouter(
-	jwtSvc     *jwt.Service,
-	userRepo   user.Repository,
-	monitorRepo monitor.Repository,
-	checkRepo  monitor.CheckRepository,
-	redisClient *redis.Client,
+	jwtSvc          *jwt.Service,
+	userRepo        user.Repository,
+	monitorRepo     monitor.Repository,
+	checkRepo       monitor.CheckRepository,
+	alertConfigRepo alert.ConfigRepository,
+	redisClient     *redis.Client,
 ) http.Handler {
 	r := chi.NewRouter()
 
@@ -40,6 +42,7 @@ func NewRouter(
 	// Handlers
 	authHandler    := handler.NewAuthHandler(userRepo, jwtSvc)
 	monitorHandler := handler.NewMonitorHandler(monitorRepo, checkRepo)
+	alertHandler   := handler.NewAlertHandler(alertConfigRepo)
 
 	// Public routes
 	r.Post("/api/auth/register", authHandler.Register)
@@ -49,11 +52,20 @@ func NewRouter(
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.Auth(jwtSvc))
 
-		r.Post("/api/monitors",              monitorHandler.Create)
-		r.Get("/api/monitors",               monitorHandler.List)
-		r.Get("/api/monitors/{id}",          monitorHandler.Get)
-		r.Delete("/api/monitors/{id}",       monitorHandler.Delete)
-		r.Get("/api/monitors/{id}/history",  monitorHandler.History)
+		r.Route("/api/monitors", func(r chi.Router) {
+			r.Post("/", monitorHandler.Create)
+			r.Get("/", monitorHandler.List)
+			r.Get("/{id}", monitorHandler.Get)
+			r.Delete("/{id}", monitorHandler.Delete)
+			r.Get("/{id}/history", monitorHandler.History)
+
+			// Alert configuration
+			r.Route("/{monitorId}/alerts", func(r chi.Router) {
+				r.Post("/", alertHandler.Create)
+				r.Get("/", alertHandler.List)
+				r.Delete("/{id}", alertHandler.Delete)
+			})
+		})
 	})
 
 	return r

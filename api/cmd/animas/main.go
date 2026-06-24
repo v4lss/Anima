@@ -51,9 +51,11 @@ func main() {
 	}
 
 	// Repositories
-	userRepo    := mongodb.NewUserRepository(db)
-	monitorRepo := mongodb.NewMonitorRepository(db)
-	checkRepo   := mongodb.NewCheckRepository(db)
+	userRepo        := mongodb.NewUserRepository(db)
+	monitorRepo     := mongodb.NewMonitorRepository(db)
+	checkRepo       := mongodb.NewCheckRepository(db)
+	alertRepo       := mongodb.NewAlertRepository(db)
+	alertConfigRepo := mongodb.NewAlertConfigRepository(db)
 
 	// Redis
 	queue := redisinfra.NewQueue(cfg.Redis.Addr, cfg.Redis.Password)
@@ -64,7 +66,8 @@ func main() {
 	jwtSvc := jwt.New(cfg.JWT.Secret, expiry)
 
 	// HTTP
-	router := apphttp.NewRouter(jwtSvc, userRepo, monitorRepo, checkRepo, queue.Client())
+	discordNotifier := notifier.NewDiscordNotifier()
+	router := apphttp.NewRouter(jwtSvc, userRepo, monitorRepo, checkRepo, alertConfigRepo, queue.Client())
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%s", cfg.App.Port),
@@ -77,8 +80,8 @@ func main() {
 	workerCtx, workerCancel := context.WithCancel(context.Background())
 
 	scheduler   := workers.NewScheduler(monitorRepo, queue)
-	httpChecker := workers.NewHTTPChecker(monitorRepo, checkRepo, queue)
-	tcpChecker  := workers.NewTCPChecker(monitorRepo, checkRepo, queue)
+	httpChecker := workers.NewHTTPChecker(monitorRepo, checkRepo, alertConfigRepo, alertRepo, queue, discordNotifier)
+	tcpChecker  := workers.NewTCPChecker(monitorRepo, checkRepo, alertConfigRepo, alertRepo, queue, discordNotifier)
 
 	go scheduler.Run(workerCtx)
 	go httpChecker.Run(workerCtx)
