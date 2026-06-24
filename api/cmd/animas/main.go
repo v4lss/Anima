@@ -21,6 +21,7 @@ import (
 	"github.com/v4lss/animas/internal/workers"
 	"github.com/v4lss/animas/pkg/jwt"
 	"github.com/v4lss/animas/pkg/logger"
+	"github.com/v4lss/animas/pkg/notifier"
 )
 
 func main() {
