@@ -35,7 +35,7 @@ export default function MonitorDetail() {
   const upCount   = checks.filter(c => c.status === "UP").length;
   const uptime    = checks.length ? ((upCount / checks.length) * 100).toFixed(1) : "-";
   const avgMs     = checks.length
-    ? Math.round(checks.reduce((s, c) => s + c.responseTime, 0) / checks.length)
+    ? Math.round(checks.reduce((s, c) => s + c.responsetime, 0) / checks.length)
     : 0;
 
   return (
@@ -110,10 +110,10 @@ export default function MonitorDetail() {
             }}>
               <StatusBadge status={c.status} />
               <span style={{ fontFamily: "var(--mono)", color: "var(--subtle)", minWidth: "60px" }}>
-                {c.responseTime}ms
+                {c.responsetime}ms
               </span>
               <span style={{ color: "var(--subtle)", fontSize: "12px", flex: 1 }}>
-                {new Date(c.checkedAt).toLocaleString()}
+                {new Date(c.checkedat).toLocaleString()}
               </span>
               {c.error && (
                 <span style={{ fontSize: "11px", color: "var(--down)", fontFamily: "var(--mono)" }}>
