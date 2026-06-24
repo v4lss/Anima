@@ -2,8 +2,8 @@
 
 ## v1 - Core
 - [x] Project setup
-- [ ] User registration & login
-- [ ] JWT authentication
+- [x] User registration & login
+- [x] JWT authentication
 - [ ] HTTP/HTTPS monitors
 - [ ] TCP monitors
 - [ ] Check history & metrics
