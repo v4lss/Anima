@@ -2,7 +2,6 @@ package monitor
 
 import (
 	"testing"
-	"time"
 )
 
 func TestValidate(t *testing.T) {
