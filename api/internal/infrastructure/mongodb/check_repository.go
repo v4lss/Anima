@@ -37,5 +37,6 @@ func (r *CheckRepository) FindByMonitorID(ctx context.Context, monitorID string,
 		return nil, err
 	}
 	var checks []*monitor.Check
-	return checks, cursor.All(ctx, &checks)
+	err = cursor.All(ctx, &checks)
+	return checks, err
 }

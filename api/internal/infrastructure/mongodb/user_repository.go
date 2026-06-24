@@ -28,7 +28,7 @@ func (r *UserRepository) Create(ctx context.Context, u *user.User) error {
 
 func (r *UserRepository) FindByID(ctx context.Context, id string) (*user.User, error) {
 	var u user.User
-	err := r.col.FindOne(ctx, bson.M{"_id": id}).Decode(&u)
+	err := r.col.FindOne(ctx, bson.M{"id": id}).Decode(&u)
 	return &u, err
 }
 

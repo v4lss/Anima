@@ -5,8 +5,8 @@ import "time"
 
 // User represents a registered account.
 type User struct {
-	ID           string
-	Email        string
-	PasswordHash string
-	CreatedAt    time.Time
+	ID           string    `bson:"id"`
+	Email        string    `bson:"email"`
+	PasswordHash string    `bson:"passwordhash"`
+	CreatedAt    time.Time `bson:"createdat"`
 }

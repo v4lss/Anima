@@ -16,25 +16,25 @@ const (
 // Monitor is the central aggregate of Animas.
 // It describes a target that should be periodically checked.
 type Monitor struct {
-	ID        string
-	UserID    string
-	Name      string
-	Target    string      // URL for HTTP/HTTPS, "host:port" for TCP
-	Type      MonitorType
-	Interval  int  // seconds between checks
-	Enabled   bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        string    `bson:"id"`
+	UserID    string    `bson:"userid"`
+	Name      string    `bson:"name"`
+	Target    string    `bson:"target"` // URL for HTTP/HTTPS, "host:port" for TCP
+	Type      MonitorType `bson:"type"`
+	Interval  int       `bson:"interval"`
+	Enabled   bool      `bson:"enabled"`
+	CreatedAt time.Time `bson:"createdat"`
+	UpdatedAt time.Time `bson:"updatedat"`
 }
 
 // Check represents a single probe result for a Monitor.
 type Check struct {
-	ID           string
-	MonitorID    string
-	Status       CheckStatus
-	ResponseTime int64 // milliseconds
-	Error        string
-	CheckedAt    time.Time
+	ID           string      `bson:"id"`
+	MonitorID    string      `bson:"monitorid"`
+	Status       CheckStatus `bson:"status"`
+	ResponseTime int64       `bson:"responsetime"` // milliseconds
+	Error        string      `bson:"error"`
+	CheckedAt    time.Time   `bson:"checkedat"`
 }
 
 // CheckStatus indicates whether the probe succeeded or failed.
