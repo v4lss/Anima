@@ -1,0 +1,15 @@
+app:
+  env: development
+  port: 8080
+
+mongo:
+  uri: mongodb://localhost:27017
+  db: animas
+
+redis:
+  addr: localhost:6379
+  password: ""
+
+jwt:
+  secret: change_me_in_production
+  expiry: 24h

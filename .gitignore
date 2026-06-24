@@ -1,0 +1,24 @@
+# Go
+/api/bin/
+*.exe
+*.test
+*.out
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Node
+web/node_modules/
+web/dist/
+web/.next/
+web/.nuxt/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
