@@ -3,6 +3,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -40,6 +41,12 @@ func (h *AlertHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate webhook URL format (basic check)
+	if !strings.HasPrefix(input.Webhook, "https://") && !strings.HasPrefix(input.Webhook, "http://") {
+		response.Error(w, http.StatusBadRequest, "webhook must be a valid URL")
+		return
+	}
+
 	config := &alert.Config{
 		MonitorID: monitorID,
 		UserID:    userID,
@@ -58,7 +65,12 @@ func (h *AlertHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 // List handles GET /api/monitors/:monitorId/alerts
 func (h *AlertHandler) List(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.UserIDFromContext(r.Context())
 	monitorID := chi.URLParam(r, "monitorId")
+
+	// Verify user owns this monitor (need to check via monitor repo)
+	// For now, we'll skip this check as we don't have monitor repo in AlertHandler
+	// TODO: Add monitor repo to AlertHandler for proper authorization
 
 	configs, err := h.alertConfigRepo.FindByMonitorID(r.Context(), monitorID)
 	if err != nil {
@@ -66,12 +78,46 @@ func (h *AlertHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.Success(w, http.StatusOK, configs)
+	// Filter configs by user ID
+	var userConfigs []*alert.Config
+	for _, cfg := range configs {
+		if cfg.UserID == userID {
+			userConfigs = append(userConfigs, cfg)
+		}
+	}
+
+	response.Success(w, http.StatusOK, userConfigs)
 }
 
 // Delete handles DELETE /api/monitors/:monitorId/alerts/:id
 func (h *AlertHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.UserIDFromContext(r.Context())
 	id := chi.URLParam(r, "id")
+
+	// Get the alert config to verify ownership
+	configs, err := h.alertConfigRepo.FindByMonitorID(r.Context(), chi.URLParam(r, "monitorId"))
+	if err != nil {
+		response.Error(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var targetConfig *alert.Config
+	for _, cfg := range configs {
+		if cfg.ID == id {
+			targetConfig = cfg
+			break
+		}
+	}
+
+	if targetConfig == nil {
+		response.Error(w, http.StatusNotFound, "alert config not found")
+		return
+	}
+
+	if targetConfig.UserID != userID {
+		response.Error(w, http.StatusForbidden, "forbidden")
+		return
+	}
 
 	if err := h.alertConfigRepo.Delete(r.Context(), id); err != nil {
 		response.Error(w, http.StatusInternalServerError, err.Error())

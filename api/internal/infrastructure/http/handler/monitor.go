@@ -39,6 +39,24 @@ func (h *MonitorHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate inputs
+	if body.Name == "" {
+		response.Error(w, http.StatusBadRequest, "name is required")
+		return
+	}
+	if body.Target == "" {
+		response.Error(w, http.StatusBadRequest, "target is required")
+		return
+	}
+	if body.Type != monitor.HTTP && body.Type != monitor.HTTPS && body.Type != monitor.TCP {
+		response.Error(w, http.StatusBadRequest, "invalid monitor type")
+		return
+	}
+	if body.Interval < 10 || body.Interval > 3600 {
+		response.Error(w, http.StatusBadRequest, "interval must be between 10 and 3600 seconds")
+		return
+	}
+
 	m, err := appmonitor.CreateMonitor(r.Context(), h.monitorRepo, appmonitor.CreateMonitorInput{
 		UserID:   userID,
 		Name:     body.Name,
@@ -85,11 +103,18 @@ func (h *MonitorHandler) List(w http.ResponseWriter, r *http.Request) {
 
 // Get handles GET /api/monitors/:id
 func (h *MonitorHandler) Get(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.UserIDFromContext(r.Context())
 	id := chi.URLParam(r, "id")
 
 	m, err := h.monitorRepo.FindByID(r.Context(), id)
 	if err != nil {
 		response.Error(w, http.StatusNotFound, "monitor not found")
+		return
+	}
+
+	// Verify user owns this monitor
+	if m.UserID != userID {
+		response.Error(w, http.StatusForbidden, "forbidden")
 		return
 	}
 
@@ -115,7 +140,19 @@ func (h *MonitorHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 // History handles GET /api/monitors/:id/history
 func (h *MonitorHandler) History(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.UserIDFromContext(r.Context())
 	id := chi.URLParam(r, "id")
+
+	// Verify user owns this monitor
+	m, err := h.monitorRepo.FindByID(r.Context(), id)
+	if err != nil {
+		response.Error(w, http.StatusNotFound, "monitor not found")
+		return
+	}
+	if m.UserID != userID {
+		response.Error(w, http.StatusForbidden, "forbidden")
+		return
+	}
 
 	// Parse query parameters
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))

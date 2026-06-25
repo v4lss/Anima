@@ -28,6 +28,8 @@ export default function MonitorDetail() {
   const [toDate, setToDate] = useState<string>("");
 
   async function loadChecks(pageNum: number = 1, append: boolean = false) {
+    if (!id) return;
+    
     try {
       if (pageNum === 1) {
         setLoading(true);
@@ -54,6 +56,11 @@ export default function MonitorDetail() {
       }
       setTotal(res.data.total);
       setHasMore((res.data.data?.length ?? 0) === res.data.limit && (res.data.page * res.data.limit) < res.data.total);
+    } catch (e) {
+      console.error(e);
+      if (pageNum === 1) {
+        setChecks([]);
+      }
     } finally {
       setLoading(false);
       setLoadingMore(false);

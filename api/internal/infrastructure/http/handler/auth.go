@@ -32,6 +32,12 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate password length
+	if len(body.Password) < 8 {
+		response.Error(w, http.StatusBadRequest, "password must be at least 8 characters")
+		return
+	}
+
 	u, err := appauth.Register(r.Context(), h.userRepo, appauth.RegisterInput{
 		Email:    body.Email,
 		Password: body.Password,
