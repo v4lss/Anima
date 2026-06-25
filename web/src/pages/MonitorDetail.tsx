@@ -317,7 +317,15 @@ export default function MonitorDetail() {
               }}>
                 <div>
                   <p style={{ fontWeight: 500, fontSize: "13px" }}>{a.Type}</p>
-                  <p style={{ color: "var(--subtle)", fontSize: "12px", fontFamily: "var(--mono)" }}>
+                  <p style={{ 
+                    color: "var(--subtle)", 
+                    fontSize: "12px", 
+                    fontFamily: "var(--mono)",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    maxWidth: "400px",
+                  }}>
                     {a.Webhook}
                   </p>
                 </div>
