@@ -19,4 +19,5 @@ type Repository interface {
 type CheckRepository interface {
 	Save(ctx context.Context, c *Check) error
 	FindByMonitorID(ctx context.Context, monitorID string, limit int) ([]*Check, error)
+	FindByMonitorIDPaginated(ctx context.Context, monitorID string, page, limit int, status string, fromDate, toDate string) ([]*Check, int64, error)
 }

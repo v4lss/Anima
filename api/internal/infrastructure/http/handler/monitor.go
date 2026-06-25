@@ -4,6 +4,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 
@@ -116,11 +117,29 @@ func (h *MonitorHandler) Delete(w http.ResponseWriter, r *http.Request) {
 func (h *MonitorHandler) History(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
-	checks, err := h.checkRepo.FindByMonitorID(r.Context(), id, 100)
+	// Parse query parameters
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	if page < 1 {
+		page = 1
+	}
+	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+	if limit < 1 || limit > 100 {
+		limit = 20
+	}
+	status := r.URL.Query().Get("status")
+	fromDate := r.URL.Query().Get("from")
+	toDate := r.URL.Query().Get("to")
+
+	checks, total, err := h.checkRepo.FindByMonitorIDPaginated(r.Context(), id, page, limit, status, fromDate, toDate)
 	if err != nil {
 		response.Error(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	response.Success(w, http.StatusOK, checks)
+	response.Success(w, http.StatusOK, map[string]interface{}{
+		"data":  checks,
+		"total": total,
+		"page":  page,
+		"limit": limit,
+	})
 }
