@@ -1,6 +1,7 @@
 // api.ts - base Fetch wrapper for the Animas API.
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
+// Use relative path for Vite proxy, or override with env var
+const BASE_URL = import.meta.env.VITE_API_URL ?? "/api";
 
 function getToken(): string | null {
   return localStorage.getItem("animas_token");
