@@ -22,8 +22,8 @@ func Register(ctx context.Context, repo user.Repository, in RegisterInput) (*use
 		return nil, errors.New("email and password are required")
 	}
 
-	existing, _ := repo.FindByEmail(ctx, in.Email)
-	if existing != nil {
+	existing, err := repo.FindByEmail(ctx, in.Email)
+	if err == nil && existing != nil {
 		return nil, errors.New("email already registered")
 	}
 

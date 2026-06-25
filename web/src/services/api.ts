@@ -1,7 +1,7 @@
 // api.ts - base Fetch wrapper for the Animas API.
 
-// Use relative path for Vite proxy, or override with env var
-const BASE_URL = import.meta.env.VITE_API_URL ?? "/api";
+// Use empty string for Vite proxy (routes starting with /api are proxied), or override with env var
+const BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
 function getToken(): string | null {
   return localStorage.getItem("animas_token");

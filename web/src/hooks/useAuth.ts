@@ -10,8 +10,8 @@ export function useAuth() {
     try {
       setLoading(true);
       setError(null);
-      const res = await api.post<AuthResponse>("/api/auth/login", { email, password });
-      localStorage.setItem("animas_token", res.token);
+      const res = await api.post<{data: AuthResponse}>("/api/auth/login", { email, password });
+      localStorage.setItem("animas_token", res.data.token);
       return true;
     } catch (e: any) {
       setError(e.message);
