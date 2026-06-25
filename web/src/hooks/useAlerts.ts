@@ -38,7 +38,7 @@ export function useAlerts(monitorId: string) {
       setLoading(true);
       setError(null);
       await api.delete(`/api/monitors/${monitorId}/alerts/${id}`);
-      setAlerts(prev => prev.filter(a => a.id !== id));
+      setAlerts(prev => prev.filter(a => a.ID !== id));
     } catch (e: any) {
       setError(e.message);
     } finally {

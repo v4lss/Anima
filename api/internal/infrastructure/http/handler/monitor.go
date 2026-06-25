@@ -3,6 +3,7 @@ package handler
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -50,6 +51,7 @@ func (h *MonitorHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("[MonitorHandler] Created monitor with ID: %s", m.ID)
 	response.Success(w, http.StatusCreated, m)
 }
 

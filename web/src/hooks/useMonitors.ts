@@ -11,6 +11,8 @@ export function useMonitors() {
     try {
       setLoading(true);
       const res = await api.get<{ data: Monitor[] }>("/api/monitors");
+      console.log("[useMonitors] Response:", res);
+      console.log("[useMonitors] Monitors:", res.data);
       setMonitors(res.data);
     } catch (e: any) {
       setError(e.message);
@@ -23,7 +25,7 @@ export function useMonitors() {
 
   async function deleteMonitor(id: string) {
     await api.delete(`/api/monitors/${id}`);
-    setMonitors(prev => prev.filter(m => m.id !== id));
+    setMonitors(prev => prev.filter(m => m.ID !== id));
   }
 
   return { monitors, loading, error, refetch: fetch, deleteMonitor };

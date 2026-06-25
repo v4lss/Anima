@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMonitors } from "../hooks/useMonitors";
 import { api } from "../services/api";
-import { MonitorType } from "../types/monitor";
+import {Monitor, MonitorType} from "../types/monitor";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import StatusBadge from "../components/StatusBadge";
@@ -42,8 +42,8 @@ export default function Dashboard() {
         <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
           {monitors.map(m => (
             <div
-              key={m.id}
-              onClick={() => navigate(`/monitors/${m.id}`)}
+              key={m.ID}
+              onClick={() => navigate(`/monitors/${m.ID}`)}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -58,14 +58,14 @@ export default function Dashboard() {
               onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--muted)")}
               onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--border)")}
             >
-              <StatusBadge status={m.lastStatus || (m.enabled ? "UP" : "DOWN")} />
+              <StatusBadge status={m.lastStatus || (m.Enabled ? "UP" : "DOWN")} />
 
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ fontWeight: 500, fontSize: "14px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                  {m.name}
+                  {m.Name}
                 </p>
                 <p style={{ color: "var(--subtle)", fontSize: "12px", fontFamily: "var(--mono)", marginTop: "1px" }}>
-                  {m.target}
+                  {m.Target}
                 </p>
               </div>
 
@@ -77,15 +77,15 @@ export default function Dashboard() {
                 borderRadius: "4px",
                 fontFamily: "var(--mono)",
               }}>
-                {m.type}
+                {m.Type}
               </span>
 
               <span style={{ fontSize: "12px", color: "var(--subtle)" }}>
-                every {m.interval}s
+                every {m.Interval}s
               </span>
 
               <button
-                onClick={e => { e.stopPropagation(); deleteMonitor(m.id); }}
+                onClick={e => { e.stopPropagation(); deleteMonitor(m.ID); }}
                 style={{
                   background: "none",
                   border: "none",
@@ -123,7 +123,9 @@ function CreateMonitorForm({ onCreated, onCancel }: { onCreated: () => void; onC
     try {
       setLoading(true);
       setError(null);
-      await api.post("/api/monitors", { name, target, type, interval: parseInt(interval) });
+      const res = await api.post<{ data: Monitor }>("/api/monitors", { name, target, type, interval: parseInt(interval) });
+      console.log("[Dashboard] Create monitor response:", res);
+      console.log("[Dashboard] Monitor ID:", res.data.ID);
       onCreated();
     } catch (e: any) {
       setError(e.message);

@@ -38,10 +38,10 @@ export default function MonitorDetail() {
   if (!monitor) return <p style={{ color: "var(--down)" }}>Monitor not found.</p>;
 
   const lastCheck = checks[0];
-  const upCount   = checks.filter(c => c.status === "UP").length;
+  const upCount   = checks.filter(c => c.Status === "UP").length;
   const uptime    = checks.length ? ((upCount / checks.length) * 100).toFixed(1) : "-";
   const avgMs     = checks.length
-    ? Math.round(checks.reduce((s, c) => s + c.responsetime, 0) / checks.length)
+    ? Math.round(checks.reduce((s, c) => s + c.ResponseTime, 0) / checks.length)
     : 0;
 
   return (
@@ -58,10 +58,10 @@ export default function MonitorDetail() {
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "28px" }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "4px" }}>
-            <h1 style={{ fontSize: "20px", fontWeight: 600 }}>{monitor.name}</h1>
-            {lastCheck && <StatusBadge status={lastCheck.status} />}
+            <h1 style={{ fontSize: "20px", fontWeight: 600 }}>{monitor.Name}</h1>
+            {lastCheck && <StatusBadge status={lastCheck.Status} />}
           </div>
-          <p style={{ color: "var(--subtle)", fontFamily: "var(--mono)", fontSize: "12px" }}>{monitor.target}</p>
+          <p style={{ color: "var(--subtle)", fontFamily: "var(--mono)", fontSize: "12px" }}>{monitor.Target}</p>
         </div>
         <span style={{
           fontSize: "11px",
@@ -71,7 +71,7 @@ export default function MonitorDetail() {
           borderRadius: "4px",
           fontFamily: "var(--mono)",
         }}>
-          {monitor.type}
+          {monitor.Type}
         </span>
       </div>
 
@@ -80,7 +80,7 @@ export default function MonitorDetail() {
         {[
           { label: "Uptime (last 100)", value: `${uptime}%` },
           { label: "Avg response", value: checks.length ? `${avgMs}ms` : "-" },
-          { label: "Check interval", value: `${monitor.interval}s` },
+          { label: "Check interval", value: `${monitor.Interval}s` },
         ].map(s => (
           <div key={s.label} style={{
             background: "var(--surface)",
@@ -104,7 +104,7 @@ export default function MonitorDetail() {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
           {checks.slice(0, 50).map(c => (
-            <div key={c.id} style={{
+            <div key={c.ID} style={{
               display: "flex",
               alignItems: "center",
               gap: "16px",
@@ -114,16 +114,16 @@ export default function MonitorDetail() {
               borderRadius: "var(--radius)",
               fontSize: "13px",
             }}>
-              <StatusBadge status={c.status} />
+              <StatusBadge status={c.Status} />
               <span style={{ fontFamily: "var(--mono)", color: "var(--subtle)", minWidth: "60px" }}>
-                {c.responsetime}ms
+                {c.ResponseTime}ms
               </span>
               <span style={{ color: "var(--subtle)", fontSize: "12px", flex: 1 }}>
-                {new Date(c.checkedat).toLocaleString()}
+                {new Date(c.CheckedAt).toLocaleString()}
               </span>
-              {c.error && (
+              {c.Error && (
                 <span style={{ fontSize: "11px", color: "var(--down)", fontFamily: "var(--mono)" }}>
-                  {c.error}
+                  {c.Error}
                 </span>
               )}
             </div>
@@ -147,7 +147,7 @@ export default function MonitorDetail() {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {alerts.map(a => (
-              <div key={a.id} style={{
+              <div key={a.ID} style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
@@ -157,13 +157,13 @@ export default function MonitorDetail() {
                 borderRadius: "var(--radius)",
               }}>
                 <div>
-                  <p style={{ fontWeight: 500, fontSize: "13px" }}>{a.type}</p>
+                  <p style={{ fontWeight: 500, fontSize: "13px" }}>{a.Type}</p>
                   <p style={{ color: "var(--subtle)", fontSize: "12px", fontFamily: "var(--mono)" }}>
-                    {a.webhook}
+                    {a.Webhook}
                   </p>
                 </div>
                 <button
-                  onClick={() => deleteAlert(a.id)}
+                  onClick={() => deleteAlert(a.ID)}
                   style={{
                     background: "none",
                     border: "none",
@@ -198,7 +198,7 @@ export default function MonitorDetail() {
 
   async function deleteAlert(alertId: string) {
     await api.delete(`/api/monitors/${id}/alerts/${alertId}`);
-    setAlerts(prev => prev.filter(a => a.id !== alertId));
+    setAlerts(prev => prev.filter(a => a.ID !== alertId));
   }
 }
 

@@ -3,12 +3,12 @@
 export type AlertType = "DISCORD" | "EMAIL";
 
 export interface AlertConfig {
-  id: string;
-  monitorid: string;
-  userid: string;
-  type: AlertType;
-  webhook: string;
-  enabled: boolean;
-  createdat: string;
-  updatedat: string;
+  ID: string;
+  MonitorID: string;
+  UserID: string;
+  Type: AlertType;
+  Webhook: string;
+  Enabled: boolean;
+  CreatedAt: string;
+  UpdatedAt: string;
 }

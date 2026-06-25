@@ -4,23 +4,23 @@ export type MonitorType = "HTTP" | "HTTPS" | "TCP";
 export type CheckStatus = "UP" | "DOWN";
 
 export interface Monitor {
-  id: string;
-  userid: string;
-  name: string;
-  target: string;
-  type: MonitorType;
-  interval: number; // seconds
-  enabled: boolean;
-  createdat: string;
-  updatedat: string;
+  ID: string;
+  UserID: string;
+  Name: string;
+  Target: string;
+  Type: MonitorType;
+  Interval: number; // seconds
+  Enabled: boolean;
+  CreatedAt: string;
+  UpdatedAt: string;
   lastStatus?: CheckStatus; // last check status from API
 }
 
 export interface Check {
-  id: string;
-  monitorid: string;
-  status: CheckStatus;
-  responsetime: number; // ms
-  error?: string;
-  checkedat: string;
+  ID: string;
+  MonitorID: string;
+  Status: CheckStatus;
+  ResponseTime: number; // ms
+  Error?: string;
+  CheckedAt: string;
 }
