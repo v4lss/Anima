@@ -123,7 +123,7 @@ function CreateMonitorForm({ onCreated, onCancel }: { onCreated: () => void; onC
     try {
       setLoading(true);
       setError(null);
-      const res = await api.post<{ data: Monitor }>("/api/monitors", { name, target, type, interval: parseInt(interval) });
+      await api.post<{ data: Monitor }>("/api/monitors", { name, target, type, interval: parseInt(interval) });
       onCreated();
     } catch (e: any) {
       setError(e.message);
