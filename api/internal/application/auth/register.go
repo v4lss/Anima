@@ -4,6 +4,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"net/mail"
 	"strings"
 	"time"
 
@@ -20,6 +21,11 @@ type RegisterInput struct {
 func Register(ctx context.Context, repo user.Repository, in RegisterInput) (*user.User, error) {
 	if strings.TrimSpace(in.Email) == "" || strings.TrimSpace(in.Password) == "" {
 		return nil, errors.New("email and password are required")
+	}
+
+	// Validate email format
+	if _, err := mail.ParseAddress(in.Email); err != nil {
+		return nil, errors.New("invalid email format")
 	}
 
 	existing, err := repo.FindByEmail(ctx, in.Email)
