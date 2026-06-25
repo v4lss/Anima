@@ -111,7 +111,7 @@ export default function MonitorDetail() {
     : 0;
 
   return (
-    <div style={{ maxWidth: "760px" }}>
+    <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
       {/* Back */}
       <button
         onClick={() => navigate("/")}
