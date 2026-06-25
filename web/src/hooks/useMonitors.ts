@@ -11,8 +11,6 @@ export function useMonitors() {
     try {
       setLoading(true);
       const res = await api.get<{ data: Monitor[] }>("/api/monitors");
-      console.log("[useMonitors] Response:", res);
-      console.log("[useMonitors] Monitors:", res.data);
       setMonitors(res.data);
     } catch (e: any) {
       setError(e.message);

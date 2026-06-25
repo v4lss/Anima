@@ -20,12 +20,14 @@ func Auth(jwtSvc *jwt.Service) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			header := r.Header.Get("Authorization")
+			
 			if !strings.HasPrefix(header, "Bearer ") {
 				response.Error(w, http.StatusUnauthorized, "missing token")
 				return
 			}
 
 			token := strings.TrimPrefix(header, "Bearer ")
+			
 			userID, err := jwtSvc.Verify(token)
 			if err != nil {
 				response.Error(w, http.StatusUnauthorized, "invalid token")
@@ -37,6 +39,7 @@ func Auth(jwtSvc *jwt.Service) func(http.Handler) http.Handler {
 		})
 	}
 }
+
 
 // UserIDFromContext extracts the userID injected by the Auth middleware.
 func UserIDFromContext(ctx context.Context) string {

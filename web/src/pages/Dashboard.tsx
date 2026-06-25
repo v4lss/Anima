@@ -124,8 +124,6 @@ function CreateMonitorForm({ onCreated, onCancel }: { onCreated: () => void; onC
       setLoading(true);
       setError(null);
       const res = await api.post<{ data: Monitor }>("/api/monitors", { name, target, type, interval: parseInt(interval) });
-      console.log("[Dashboard] Create monitor response:", res);
-      console.log("[Dashboard] Monitor ID:", res.data.ID);
       onCreated();
     } catch (e: any) {
       setError(e.message);

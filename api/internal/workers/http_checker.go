@@ -58,7 +58,6 @@ func (c *HTTPChecker) Run(ctx context.Context) {
 func (c *HTTPChecker) check(ctx context.Context, monitorID string) {
 	m, err := c.monitorRepo.FindByID(ctx, monitorID)
 	if err != nil {
-		log.Printf("[http_checker] monitor not found: %s", monitorID)
 		return
 	}
 
