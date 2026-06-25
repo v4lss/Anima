@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/v4lss/animas/internal/domain/alert"
+	"github.com/v4lss/animas/internal/domain/monitor"
 	"github.com/v4lss/animas/internal/infrastructure/http/middleware"
 	"github.com/v4lss/animas/pkg/response"
 )
@@ -15,16 +16,28 @@ import (
 // AlertHandler handles alert configuration requests.
 type AlertHandler struct {
 	alertConfigRepo alert.ConfigRepository
+	monitorRepo     monitor.Repository
 }
 
-func NewAlertHandler(acr alert.ConfigRepository) *AlertHandler {
-	return &AlertHandler{alertConfigRepo: acr}
+func NewAlertHandler(acr alert.ConfigRepository, mr monitor.Repository) *AlertHandler {
+	return &AlertHandler{alertConfigRepo: acr, monitorRepo: mr}
 }
 
 // Create handles POST /api/monitors/:monitorId/alerts
 func (h *AlertHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.UserIDFromContext(r.Context())
 	monitorID := chi.URLParam(r, "monitorId")
+
+	// Verify user owns this monitor
+	m, err := h.monitorRepo.FindByID(r.Context(), monitorID)
+	if err != nil {
+		response.Error(w, http.StatusNotFound, "monitor not found")
+		return
+	}
+	if m.UserID != userID {
+		response.Error(w, http.StatusForbidden, "forbidden")
+		return
+	}
 
 	var input struct {
 		Type    alert.AlertType `json:"type"`
@@ -68,9 +81,16 @@ func (h *AlertHandler) List(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.UserIDFromContext(r.Context())
 	monitorID := chi.URLParam(r, "monitorId")
 
-	// Verify user owns this monitor (need to check via monitor repo)
-	// For now, we'll skip this check as we don't have monitor repo in AlertHandler
-	// TODO: Add monitor repo to AlertHandler for proper authorization
+	// Verify user owns this monitor
+	m, err := h.monitorRepo.FindByID(r.Context(), monitorID)
+	if err != nil {
+		response.Error(w, http.StatusNotFound, "monitor not found")
+		return
+	}
+	if m.UserID != userID {
+		response.Error(w, http.StatusForbidden, "forbidden")
+		return
+	}
 
 	configs, err := h.alertConfigRepo.FindByMonitorID(r.Context(), monitorID)
 	if err != nil {
@@ -78,15 +98,7 @@ func (h *AlertHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Filter configs by user ID
-	var userConfigs []*alert.Config
-	for _, cfg := range configs {
-		if cfg.UserID == userID {
-			userConfigs = append(userConfigs, cfg)
-		}
-	}
-
-	response.Success(w, http.StatusOK, userConfigs)
+	response.Success(w, http.StatusOK, configs)
 }
 
 // Delete handles DELETE /api/monitors/:monitorId/alerts/:id

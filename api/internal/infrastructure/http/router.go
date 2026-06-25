@@ -42,7 +42,7 @@ func NewRouter(
 	// Handlers
 	authHandler    := handler.NewAuthHandler(userRepo, jwtSvc)
 	monitorHandler := handler.NewMonitorHandler(monitorRepo, checkRepo)
-	alertHandler   := handler.NewAlertHandler(alertConfigRepo)
+	alertHandler   := handler.NewAlertHandler(alertConfigRepo, monitorRepo)
 
 	// Public routes
 	r.Post("/api/auth/register", authHandler.Register)
